@@ -32,6 +32,17 @@ def calibrate_camera(nx, ny):
 
     return mtx, dist
 
+def save_calibration_data(cameraMatrix, distortionCoeffs):
+    print("Saving calibration data ...")
+    np.savez("calibration_data",
+        cameraMatrix=cameraMatrix,
+        distortionCoeffs=distortionCoeffs)
+
+def load_calibration_data():
+    print("Loading calibration data ...")
+    with np.load("calibration_data.npz") as data:
+        return data["cameraMatrix"], data["distortionCoeffs"]
+
 def undistort_image(image, cameraMatrix, distortionCoeffs):
     print("Undistorting image ...")
     return cv2.undistort(image, cameraMatrix, distortionCoeffs)
