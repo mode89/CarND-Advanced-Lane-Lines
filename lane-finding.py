@@ -30,5 +30,14 @@ def calibrate_camera(nx, ny):
         None,
         None)
 
+    return mtx, dist
+
+def undistort_image(image, cameraMatrix, distortionCoeffs):
+    print("Undistorting image ...")
+    return cv2.undistort(image, cameraMatrix, distortionCoeffs)
+
 if __name__ == "__main__":
-    calibrate_camera(9, 6)
+    cameraMatrix, distortionCoeffs = calibrate_camera(9, 6)
+
+    image = cv2.imread("test_images/test1.jpg")
+    image = undistort_image(image, cameraMatrix, distortionCoeffs)
