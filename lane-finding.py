@@ -47,6 +47,26 @@ def undistort_image(image, cameraMatrix, distortionCoeffs):
     print("Undistorting image ...")
     return cv2.undistort(image, cameraMatrix, distortionCoeffs)
 
+def perspective_transformation():
+    src = np.float32([
+        (560, 475),
+        (725, 475),
+        (298, 660),
+        (1010, 660)
+    ])
+
+    dst = np.float32([
+        (300, 1000),
+        (670, 1000),
+        (300, 2220),
+        (670, 2220)
+    ])
+
+    perspMat = cv2.getPerspectiveTransform(src, dst)
+    perspMatInv = cv2.getPerspectiveTransform(dst, src)
+
+    return perspMat, perspMatInv
+
 if __name__ == "__main__":
     cameraMatrix, distortionCoeffs = calibrate_camera(9, 6)
 
