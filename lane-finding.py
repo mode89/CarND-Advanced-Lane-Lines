@@ -68,45 +68,6 @@ def perspective_transformation():
 
     return perspMat, perspMatInv
 
-def normalize(array):
-    absolute = np.absolute(array)
-    return np.uint8(255 * absolute / np.max(absolute))
-
-def binary_image(image):
-    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    hlsImage = cv2.cvtColor(image, cv2.COLOR_BGR2HLS)
-    sImage = hlsImage[:,:,2]
-
-    graySobelX = cv2.Sobel(grayImage, cv2.CV_32F, 1, 0)
-    graySobelY = cv2.Sobel(grayImage, cv2.CV_32F, 0, 1)
-    satSobelX = cv2.Sobel(sImage, cv2.CV_32F, 1, 0)
-    satSobelY = cv2.Sobel(sImage, cv2.CV_32F, 0, 1)
-
-    satDir = normalize(np.arctan2(
-        np.absolute(satSobelX),
-        np.absolute(satSobelY)))
-
-    satDirBin = np.zeros_like(satDir)
-    satDirBin[(satDir > 230)] = 255
-
-    satDirBlur = cv2.GaussianBlur(
-        satDirBin, ksize=(35, 35), sigmaX=10, sigmaY=10)
-    satDirBlur = np.uint8(255 * np.float32(satDirBlur) / np.max(satDirBlur))
-
-    satDirBlurBin = np.zeros_like(satDirBlur)
-    satDirBlurBin[(satDirBlur > 100)] = 255
-
-    satBin = np.zeros_like(satDirBlur)
-    satBin[(normalize(satSobelX) > 15) & (satDirBlurBin > 200)] = 255
-
-    grayPat = np.zeros_like(satDirBlur)
-    grayPat[(graySobelX > 50)] = 255
-
-    combined = np.zeros_like(grayPat)
-    combined[(grayPat > 200) | (satBin > 200)] = 255
-
-    return combined
-
 if __name__ == "__main__":
     cameraMatrix, distortionCoeffs = calibrate_camera(9, 6)
 
