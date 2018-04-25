@@ -61,6 +61,17 @@ class CameraModel:
             image, self.perspectiveMatrix, (970, 2220))
         return image
 
+    def perspective_view(self, image):
+        output = np.zeros((720, 1280), image.dtype)
+        output = cv2.warpPerspective(
+            src=image,
+            M=self.perspectiveMatrix,
+            dsize=(1280, 720),
+            dst=output,
+            flags=cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR,
+            borderMode=cv2.BORDER_TRANSPARENT)
+        return output
+
     def save(self):
         print("Saving calibration data ...")
         np.savez("camera_model",
