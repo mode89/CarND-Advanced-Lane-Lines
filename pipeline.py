@@ -4,6 +4,7 @@ import bird_view
 import binary_filter
 import camera_calibration
 import cv2
+from line_finder import LineFinder
 
 class Pipeline:
 
@@ -13,12 +14,14 @@ class Pipeline:
         self.bird_view_model = bird_view.Model()
         self.binary_filter_model = binary_filter.Model()
         self.binary_filter_model.load()
+        self.line_finder = LineFinder()
 
     def process(self, image):
         image = self.camera_model.undistort(image)
         image = self.bird_view_model.create_bird_view(image)
         image = cv2.resize(image, (97, 222))
         image = self.binary_filter_model.process_image(image)
+        self.line_finder.find_lines(image)
         return image
 
 if __name__ == "__main__":
