@@ -20,7 +20,7 @@ TEST_IMAGES = [
     "test6.jpg"
 ]
 
-class BinaryFilter:
+class Model:
 
     def load_images(self, image_file_names):
         feature_images = list()
@@ -88,7 +88,7 @@ class BinaryFilter:
             ],
             epochs=1000)
 
-    def load_model(self):
+    def load(self):
         self.model = load_model("binary_filter.h5")
 
     def process_image(self, image):
@@ -103,9 +103,9 @@ class BinaryFilter:
 
 if __name__ == "__main__":
 
-    binary_filter = BinaryFilter()
+    binary_filter = Model()
     binary_filter.train_model()
-    binary_filter.load_model()
+    binary_filter.load()
 
     for file_name in TRAIN_IMAGES + TEST_IMAGES:
         file_path = os.path.join("training_data/features", file_name)
