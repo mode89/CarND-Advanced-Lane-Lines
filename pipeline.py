@@ -46,7 +46,16 @@ class Pipeline:
         return undistortedImage
 
     def interploate_line(self, linePolynomial):
-        return np.int32([[500, 1000], [500, 2220]])
+        polynomial = Pipeline.scaleup_polynomial(linePolynomial, 10)
+        points = list()
+        for i in range(10):
+            y = i * 2220 / 9
+            x = np.polyval(polynomial, y)
+            points.append((x, y))
+        return points
+
+    def scaleup_polynomial(polynomial, times):
+        return np.multiply(polynomial, [1.0 / times, 1, times])
 
     def perspective_transform(self, points):
         return self.bird_view_model.perspective_transform(points)
