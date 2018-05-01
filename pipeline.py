@@ -75,7 +75,7 @@ class Pipeline:
         points = list()
         for i in range(10):
             y = i * 2220 / 9
-            x = np.polyval(polynomial, y)
+            x = np.polyval(polynomial, y) + 5
             points.append((x, y))
         return points
 
