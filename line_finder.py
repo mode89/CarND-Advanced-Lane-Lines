@@ -98,5 +98,9 @@ class SlidingWindows:
         return mask
 
     def update_base(self, windowWhiteIndices):
-        windowWhiteMean = np.mean(windowWhiteIndices, axis=1)
-        self.baseX = int(windowWhiteMean[1])
+        if not is_window_empty(windowWhiteIndices):
+            windowWhiteMean = np.mean(windowWhiteIndices, axis=1)
+            self.baseX = int(windowWhiteMean[1])
+
+def is_window_empty(windowWhiteIndices):
+    return len(windowWhiteIndices[0]) == 0
