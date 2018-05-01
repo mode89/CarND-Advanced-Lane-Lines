@@ -38,3 +38,14 @@ class Model:
             flags=cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR,
             borderMode=cv2.BORDER_TRANSPARENT)
         return output
+
+    def perspective_transform(self, points):
+        points = np.float32(points)
+        pointNum = points.shape[0]
+        points = points.reshape((pointNum, 1, 2))
+        points = cv2.perspectiveTransform(
+            src=points,
+            m=self.perspective_matrix_inv)
+        points = points[:,:,:2]
+        points = points.reshape((pointNum, 2))
+        return np.int64(points)

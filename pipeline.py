@@ -49,7 +49,7 @@ class Pipeline:
         return np.int32([[500, 1000], [500, 2220]])
 
     def perspective_transform(self, points):
-        return points
+        return self.bird_view_model.perspective_transform(points)
 
 if __name__ == "__main__":
     pipeline = Pipeline()
