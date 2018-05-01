@@ -16,6 +16,7 @@ class Pipeline:
         self.binary_filter_model = binary_filter.Model()
         self.binary_filter_model.load()
         self.radius = 300
+        self.offset = 0
 
     def process(self, image):
         undistortedImage = self.camera_model.undistort(image)
@@ -81,6 +82,11 @@ class Pipeline:
         radius = str(radius) if radius < 2000 else ">2000"
         Pipeline.put_text(image, (100, 100),
             "Curvature Radius: " + radius + "m")
+        offset = self.estimate_offset(lines)
+        offset = "{} cm {}".format(abs(offset),
+            "to the left" if offset > 0 else
+            "to the right" if offset < 0 else "")
+        Pipeline.put_text(image, (100, 200), "Offset: " + offset)
         return image
 
     def interploate_line(self, linePolynomial):
@@ -109,6 +115,14 @@ class Pipeline:
         self.radius = 0.95 * self.radius + 0.05 * radius
         radius = int(self.radius) // 50 * 50
         return radius
+
+    def estimate_offset(self, lines):
+        leftLinePosition = np.polyval(lines[0], 2220)
+        rightLinePosition = np.polyval(lines[1], 2220)
+        offset = (rightLinePosition + leftLinePosition) / 2.0 - 970 / 2.0
+        self.offset = 0.9 * self.offset + 0.1 * offset
+        offset = int(self.offset) // 5 * 5
+        return offset
 
     def curvature_radius(polynomial):
         a = polynomial[0]
