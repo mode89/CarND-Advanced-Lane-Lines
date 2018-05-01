@@ -24,6 +24,10 @@ class Pipeline:
 
         line_finder = LineFinder(image)
         lines = line_finder.find_lines()
+        lines = (
+            Pipeline.transform_polynomial(lines[0]),
+            Pipeline.transform_polynomial(lines[1])
+        )
 
         image = self.draw_markers(undistortedImage, lines)
 
@@ -71,13 +75,17 @@ class Pipeline:
         return undistortedImage
 
     def interploate_line(self, linePolynomial):
-        polynomial = Pipeline.scaleup_polynomial(linePolynomial, 10)
         points = list()
         for i in range(10):
             y = i * 2220 / 9
-            x = np.polyval(polynomial, y) + 5
+            x = np.polyval(linePolynomial, y)
             points.append((x, y))
         return points
+
+    def transform_polynomial(polynomial):
+        polynomial = Pipeline.scaleup_polynomial(polynomial, 10)
+        polynomial[2] += 5
+        return polynomial
 
     def scaleup_polynomial(polynomial, times):
         return np.multiply(polynomial, [1.0 / times, 1, times])
