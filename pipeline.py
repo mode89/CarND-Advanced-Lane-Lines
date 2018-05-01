@@ -143,9 +143,11 @@ class Pipeline:
 
 if __name__ == "__main__":
     pipeline = Pipeline()
-
-    image = cv2.imread("test_images/test1.jpg")
-    image = pipeline.process(image)
     cv2.namedWindow("image", cv2.WINDOW_KEEPRATIO)
-    cv2.imshow("image", image)
-    cv2.waitKey(0)
+    cap = cv2.VideoCapture("project_video.mp4")
+    while True:
+        ret, image = cap.read()
+        image = pipeline.process(image)
+        cv2.imshow("image", image)
+        cv2.waitKey(1)
+    cap.release()
