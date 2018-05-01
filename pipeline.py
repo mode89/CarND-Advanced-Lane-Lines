@@ -25,7 +25,7 @@ class Pipeline:
         line_finder = LineFinder(image)
         lines = line_finder.find_lines()
 
-        image = self.draw_lines(undistortedImage, lines)
+        image = self.draw_markers(undistortedImage, lines)
 
         return image
 
@@ -34,20 +34,40 @@ class Pipeline:
         height = image.shape[0] // times
         return cv2.resize(image, (width, height))
 
-    def draw_lines(self, undistortedImage, lines):
-        for linePolynomial in lines:
-            self.draw_line(undistortedImage, linePolynomial)
-        return undistortedImage
+    def draw_markers(self, undistortedImage, lines):
+        leftPoints = self.project_line(lines[0])
+        rightPoints = self.project_line(lines[1])
+        image = self.draw_lane(undistortedImage, leftPoints, rightPoints)
+        image = self.draw_line(image, leftPoints, (255, 0, 0))
+        image = self.draw_line(image, rightPoints, (0, 0, 255))
+        return image
 
-    def draw_line(self, undistortedImage, linePolynomial):
+    def project_line(self, linePolynomial):
         points = self.interploate_line(linePolynomial)
         points = self.perspective_transform(points)
+        return points
+
+    def draw_lane(self, undistortedImage, leftPoints, rightPoints):
+        points = np.concatenate((leftPoints, rightPoints[::-1]))
+        laneImage = np.zeros_like(undistortedImage)
+        cv2.fillPoly(
+            img=laneImage,
+            pts=[points],
+            color=(0, 255, 0))
+        undistortedImage = cv2.addWeighted(
+            undistortedImage, 1.0, laneImage, 0.3, 0.0)
+        return undistortedImage
+
+    def draw_line(self, undistortedImage, points, color):
+        lineImage = np.zeros_like(undistortedImage)
         cv2.polylines(
-            img=undistortedImage,
+            img=lineImage,
             pts=[points],
             isClosed=False,
-            color=(255, 0, 0),
+            color=color,
             thickness=5)
+        undistortedImage = cv2.addWeighted(
+            undistortedImage, 1.0, lineImage, 1.0, 0.0)
         return undistortedImage
 
     def interploate_line(self, linePolynomial):
