@@ -15,6 +15,7 @@ class Pipeline:
         self.bird_view_model = bird_view.Model()
         self.binary_filter_model = binary_filter.Model()
         self.binary_filter_model.load()
+        self.radius = 300
 
     def process(self, image):
         undistortedImage = self.camera_model.undistort(image)
@@ -30,6 +31,7 @@ class Pipeline:
         )
 
         image = self.draw_markers(undistortedImage, lines)
+        image = self.draw_text(image, lines)
 
         return image
 
@@ -74,6 +76,13 @@ class Pipeline:
             undistortedImage, 1.0, lineImage, 1.0, 0.0)
         return undistortedImage
 
+    def draw_text(self, image, lines):
+        radius = self.estimate_radius(lines)
+        radius = str(radius) if radius < 2000 else ">2000"
+        Pipeline.put_text(image, (100, 100),
+            "Curvature Radius: " + radius + "m")
+        return image
+
     def interploate_line(self, linePolynomial):
         points = list()
         for i in range(10):
@@ -92,6 +101,31 @@ class Pipeline:
 
     def perspective_transform(self, points):
         return self.bird_view_model.perspective_transform(points)
+
+    def estimate_radius(self, lines):
+        leftRadius = Pipeline.curvature_radius(lines[0])
+        rightRadius = Pipeline.curvature_radius(lines[1])
+        radius = (leftRadius + rightRadius) / 2.0
+        self.radius = 0.95 * self.radius + 0.05 * radius
+        radius = int(self.radius) // 50 * 50
+        return radius
+
+    def curvature_radius(polynomial):
+        a = polynomial[0]
+        b = polynomial[1]
+        c = polynomial[2]
+        r = (1.0 + (2.0 * a * 2220 + b) ** 2.0) ** 1.5 / abs(2.0 * a) / 100
+        return r
+
+    def put_text(image, org, text):
+        cv2.putText(
+            img=image,
+            text=text,
+            org=org,
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=2,
+            color=(255, 255, 255),
+            thickness=3)
 
 if __name__ == "__main__":
     pipeline = Pipeline()
