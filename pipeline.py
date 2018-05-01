@@ -19,7 +19,7 @@ class Pipeline:
     def process(self, image):
         undistortedImage = self.camera_model.undistort(image)
         image = self.bird_view_model.create_bird_view(undistortedImage)
-        image = cv2.resize(image, (97, 222))
+        image = Pipeline.scale_down(image, 10)
         image = self.binary_filter_model.process_image(image)
 
         line_finder = LineFinder(image)
@@ -28,6 +28,11 @@ class Pipeline:
         image = self.draw_lines(undistortedImage, lines)
 
         return image
+
+    def scale_down(image, times):
+        width = image.shape[1] // times
+        height = image.shape[0] // times
+        return cv2.resize(image, (width, height))
 
     def draw_lines(self, undistortedImage, lines):
         for linePolynomial in lines:
