@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 WINDOW_NUM = 6
-WINDOW_WIDTH = 20
+WINDOW_WIDTH = 15
 DEBUG = False
 
 class LineFinder:
