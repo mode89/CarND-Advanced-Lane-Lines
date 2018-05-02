@@ -25,14 +25,12 @@ class Pipeline:
         image = self.binary_filter_model.process_image(image)
 
         line_finder = LineFinder(image)
-        lines = line_finder.find_lines()
-        lines = (
-            Pipeline.transform_polynomial(lines[0]),
-            Pipeline.transform_polynomial(lines[1])
-        )
+        lineMasks = line_finder.find_lines()
+        linePolynomials = self.fit_lines(lineMasks)
 
-        image = self.draw_markers(undistortedImage, lines)
-        image = self.draw_text(image, lines)
+        image = self.draw_lines(undistortedImage, lineMasks)
+        image = self.draw_lane(image, linePolynomials)
+        image = self.draw_text(image, linePolynomials)
 
         return image
 
@@ -41,20 +39,42 @@ class Pipeline:
         height = image.shape[0] // times
         return cv2.resize(image, (width, height))
 
-    def draw_markers(self, undistortedImage, lines):
-        leftPoints = self.project_line(lines[0])
-        rightPoints = self.project_line(lines[1])
-        image = self.draw_lane(undistortedImage, leftPoints, rightPoints)
-        image = self.draw_line(image, leftPoints, (255, 0, 0))
-        image = self.draw_line(image, rightPoints, (0, 0, 255))
+    def draw_lines(self, image, lineMasks):
+        image = self.draw_line(image, lineMasks[0], (255, 0, 0))
+        image = self.draw_line(image, lineMasks[1], (0, 0, 255))
         return image
+
+    def draw_line(self, undistortedImage, lineMask, color):
+        image = np.zeros(lineMask.shape + (3,), dtype=np.uint8)
+        image[lineMask] = (1, 1, 1)
+        color = np.full_like(image, color)
+        image = np.multiply(image, color)
+        image = cv2.resize(image, (bird_view.WIDTH, bird_view.HEIGHT))
+        image = self.bird_view_model.create_perspective_view(image)
+        image = cv2.addWeighted(
+            undistortedImage, 1.0, image, 1.0, 0.0)
+        return image
+
+    def fit_lines(self, lineMasks):
+        return (
+            self.fit_line(lineMasks[0]),
+            self.fit_line(lineMasks[1])
+        )
+
+    def fit_line(self, lineMask):
+        pixels = lineMask.nonzero()
+        points = np.multiply(pixels, 10) + 5 # convert to cm
+        polynomial = np.polyfit(points[0], points[1], 2)
+        return polynomial
 
     def project_line(self, linePolynomial):
         points = self.interploate_line(linePolynomial)
         points = self.perspective_transform(points)
         return points
 
-    def draw_lane(self, undistortedImage, leftPoints, rightPoints):
+    def draw_lane(self, undistortedImage, linePolynomials):
+        leftPoints = self.project_line(linePolynomials[0])
+        rightPoints = self.project_line(linePolynomials[1])
         points = np.concatenate((leftPoints, rightPoints[::-1]))
         laneImage = np.zeros_like(undistortedImage)
         cv2.fillPoly(
@@ -63,18 +83,6 @@ class Pipeline:
             color=(0, 255, 0))
         undistortedImage = cv2.addWeighted(
             undistortedImage, 1.0, laneImage, 0.3, 0.0)
-        return undistortedImage
-
-    def draw_line(self, undistortedImage, points, color):
-        lineImage = np.zeros_like(undistortedImage)
-        cv2.polylines(
-            img=lineImage,
-            pts=[points],
-            isClosed=False,
-            color=color,
-            thickness=5)
-        undistortedImage = cv2.addWeighted(
-            undistortedImage, 1.0, lineImage, 1.0, 0.0)
         return undistortedImage
 
     def draw_text(self, image, lines):
@@ -92,18 +100,10 @@ class Pipeline:
     def interploate_line(self, linePolynomial):
         points = list()
         for i in range(10):
-            y = i * 2220 / 9
+            y = i * bird_view.HEIGHT / 9
             x = np.polyval(linePolynomial, y)
             points.append((x, y))
         return points
-
-    def transform_polynomial(polynomial):
-        polynomial = Pipeline.scaleup_polynomial(polynomial, 10)
-        polynomial[2] += 5
-        return polynomial
-
-    def scaleup_polynomial(polynomial, times):
-        return np.multiply(polynomial, [1.0 / times, 1, times])
 
     def perspective_transform(self, points):
         return self.bird_view_model.perspective_transform(points)
@@ -117,9 +117,10 @@ class Pipeline:
         return radius
 
     def estimate_offset(self, lines):
-        leftLinePosition = np.polyval(lines[0], 2220)
-        rightLinePosition = np.polyval(lines[1], 2220)
-        offset = (rightLinePosition + leftLinePosition) / 2.0 - 970 / 2.0
+        leftLinePosition = np.polyval(lines[0], bird_view.HEIGHT)
+        rightLinePosition = np.polyval(lines[1], bird_view.HEIGHT)
+        offset = (rightLinePosition + leftLinePosition) / 2.0 - \
+            bird_view.WIDTH / 2.0
         self.offset = 0.9 * self.offset + 0.1 * offset
         offset = int(self.offset) // 5 * 5
         return offset
@@ -128,7 +129,8 @@ class Pipeline:
         a = polynomial[0]
         b = polynomial[1]
         c = polynomial[2]
-        r = (1.0 + (2.0 * a * 2220 + b) ** 2.0) ** 1.5 / abs(2.0 * a) / 100
+        y = bird_view.HEIGHT
+        r = (1.0 + (2.0 * a * y + b) ** 2.0) ** 1.5 / abs(2.0 * a) / 100
         return r
 
     def put_text(image, org, text):

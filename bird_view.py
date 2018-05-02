@@ -3,6 +3,9 @@
 import cv2
 import numpy as np
 
+WIDTH = 970
+HEIGHT = 2220
+
 class Model:
 
     def __init__(self):
@@ -25,11 +28,11 @@ class Model:
 
     def create_bird_view(self, image):
         image = cv2.warpPerspective(
-            image, self.perspective_matrix, (970, 2220))
+            image, self.perspective_matrix, (WIDTH, HEIGHT))
         return image
 
     def create_perspective_view(self, image):
-        output = np.zeros((720, 1280), image.dtype)
+        output = np.zeros((720, 1280, 3), image.dtype)
         output = cv2.warpPerspective(
             src=image,
             M=self.perspective_matrix,
