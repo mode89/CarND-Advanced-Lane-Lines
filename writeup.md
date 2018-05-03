@@ -13,7 +13,6 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/undistort_output.png "Undistorted"
 [image2]: ./test_images/test1.jpg "Road Transformed"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
@@ -37,13 +36,38 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the [camera_calibration.py] file in
+the function [`Model.calibrate()`]. First I [load all calibration images].
+[Prepare an array of object points] of the chessboard corners in the real
+world. Then I [prepare an array of image points] associated with the object
+points of the chessboard corners by calling `cv2.findChessboardCorners()` on
+each of the calibration images. Then I [calculate the camera matrix] and the
+distortion coefficients by calling `cv2.calibrateCamera()` with the
+prepared object and image points. If you run the `camera_calibration.py`
+script, it will perform calibration an [save the matrix and coefficients]
+into the [calibration data file], which [can be loaded] in the later stages
+of the detection pipeline, saving time consumed by recalibration of camera.
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+I applied this distortion correction to one of the calibration images,
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+![Original][original_calibration_image]
 
-![alt text][image1]
+by calling [`Model.undistort()`] and obtained the following result:
+
+![Undistorted][undistorted_calibration_image]
+
+[camera_calibration.py]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/master/camera_calibration.py
+[`Model.calibrate()`]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/1c6a48ae76ba7666e9e05fc392e695cc09fb5a1a/camera_calibration.py#L8
+[load all calibration images]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/1c6a48ae76ba7666e9e05fc392e695cc09fb5a1a/camera_calibration.py#L12
+[Prepare an array of object points]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/162c65f2af7691da8a5975d05c4ee271e2e3ccf7/camera_calibration.py#L16
+[prepare an array of image points]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/162c65f2af7691da8a5975d05c4ee271e2e3ccf7/camera_calibration.py#L21
+[calculate the camera matrix]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/162c65f2af7691da8a5975d05c4ee271e2e3ccf7/camera_calibration.py#L29
+[original_calibration_image]: ./examples/original_calibration_image.jpg "Original Calibration Image"
+[undistorted_calibration_image]: ./examples/undistorted_calibration_image.jpg "Undistorted Calibration Image"
+[`Model.undistort()`]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/b46d739a75e7cce0a7e338a3033aa780ccd0c16e/camera_calibration.py#L39
+[save the matrix and coefficients]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/b46d739a75e7cce0a7e338a3033aa780ccd0c16e/camera_calibration.py#L43
+[calibration data file]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/master/camera_model.npz
+[can be loaded]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/b46d739a75e7cce0a7e338a3033aa780ccd0c16e/camera_calibration.py#L49
 
 ### Pipeline (single images)
 
