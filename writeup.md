@@ -83,9 +83,66 @@ undistorted images):
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+First, I tried to use gradients to create a binary image. But I wasn't
+satisfied by the quality of the output: it always seemed to be very noisy.
+I decided to give it a try to a convolutional neural network. My intuition
+was that the convolutional kernel facilitates almost the same goal as the
+Sobel's kernel, and I would say that the Sobel filter is the special case of
+a convolutional kernel. I've started with two convolution layers, where the
+input layer performs filtering, and the output 1x1 convolution layer just do
+regression of the filters' outputs. I think, this architecture resembles the
+original approach where we filter the original image using gradient, colors
+and then try to mix these filtered images. I played with different number of
+kernels, kernel sizes, activation functions, and number of convolution
+layers - and ended up with four convolution layers:
 
-![alt text][image3]
+* 16 7x7 filters
+* 12 5x5 filters
+* 6  3x3 filters
+* 1  1x1 filter
+
+Every layer has 1x1 strides, same padding and ReLU activation.
+
+I feed the network with 10 times minified bird eye view RGB images. It
+outputs same sized grayscale image, marking lane pixels with white color.
+For training I used only those eight images that were provided for testing
+the the binary thresholding algorithm. Six of these images were used for
+training and two images for validation. For each of these images, I've
+created a minified bird eye view image and a corresponding label image. The
+minified bird eye view images I put into the [training_data/features]
+directory and the label images I put into the [training_data/labels]
+directory. Here is an example of the original test image, its bird eye view,
+corresponding label image and the output of the trained network:
+
+![Original Test Image][test1_395_222]
+![Bird Eye View Image][minified_bird_eye_view_image]
+![Bird_Eye_View_Label_Image][bird_eye_view_label_image]
+![Network Output][network_output]
+
+All the filtering code: [training] and [predicting] - is consolidated in the
+[binary_filter.py] script. I used Keras library on top of TensorFlow. I
+tried different optimizers and the Adam optimizer showed the lowest
+validation loss. As for the loss function I used the mean squared error. I
+was able to achieve the training loss of 0.0015 with the validation loss of
+0.0027.
+
+When running the [binary_filter.py] script, it
+[generates][save_binary_filter] the [binary_filter.h5] file, that keeps the
+trained model, and can be [loaded][load_binary_filter] during the later
+stages of the detection pipeline.
+
+[training_data/features]: ./training_data/features
+[training_data/labels]: ./training_data/labels
+[test1_395_222]: ./examples/test1_395_222.jpg
+[minified_bird_eye_view_image]: ./training_data/features/test1.jpg
+[bird_eye_view_label_image]: ./training_data/labels/test1.jpg
+[network_output]: ./examples/network_output.jpg
+[training]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/3e8c47b46bd736a260eb1793ab1664620b179b96/binary_filter.py#L40
+[predicting]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/3e8c47b46bd736a260eb1793ab1664620b179b96/binary_filter.py#L94
+[binary_filter.py]: ./binary_filter.py
+[binary_filter.h5]: ./binary_filter.h5
+[save_binary_filter]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/3e8c47b46bd736a260eb1793ab1664620b179b96/binary_filter.py#L73
+[load_binary_filter]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/3e8c47b46bd736a260eb1793ab1664620b179b96/binary_filter.py#L91
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
