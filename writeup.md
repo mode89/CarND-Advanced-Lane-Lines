@@ -181,9 +181,32 @@ All code related to the perspective transformation located in the
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+The lane-line identifying code resides in the [line_finder.py] script. The
+`LineFinder` class takes as the input the thresholded output of the neural
+network, calculates histogram of the lower half of it, and
+[identifies][identify_line_bases] the possible ares of searching for
+the lines, by looking to the two peaks of the histogram. Then the algorithm
+performs [sliding window search] in the vertical direction, starting from
+the bottom of the image near the previously identified possible area of
+the lane line. In each window it [identifies][identify_window_pixels] white
+pixels and assumes that these pixels belongs to the line. It calculate the
+mean point of all the pixels belonging to the current window and use this
+point as the [base of the next window][update_window_base]. As the result,
+the `LineFinder` class [returns][return_line_masks] two numpy boolean masks,
+each representing pixels of a single lane-line on the thresholded binary
+image. Then the algorithm takes a lane-line mask, [identify][non_zero_pixels]
+non zero pixels, [scale][scale_mask_pixels] them up, so that we get back to
+centimeters, and [fit][fit_line_pixels] the pixels with a polynomial.
 
-![alt text][image5]
+[line_finder.py]: ./line_finder.py
+[identify_line_bases]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/line_finder.py#L20
+[sliding window search]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/line_finder.py#L28
+[identify_window_pixels]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/line_finder.py#L33
+[update_window_base]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/line_finder.py#L75
+[return_line_masks]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/line_finder.py#L18
+[non_zero_pixels]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/pipeline.py#L65
+[scale_mask_pixels]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/pipeline.py#L66
+[fit_line_pixels]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/f108456a82a426b5539e12abeaa6214d682a877c/pipeline.py#L67
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
