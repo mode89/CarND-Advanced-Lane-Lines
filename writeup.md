@@ -210,7 +210,24 @@ centimeters, and [fit][fit_line_pixels] the pixels with a polynomial.
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+To calculate the radius of the curvature I [used][calculate_radius]
+the following formula:
+
+![Curvature Radius Formula][curvature_radius_formula]
+
+I [estimate][estimate_radius] the radius by averaging the radius of
+the both of the lines, calculating the running average of this value and
+round it up to 50 meters.
+
+I [estimate][estimate_position] the position of the vehicle with respect to
+the center of the lane by calculating the distance of the lines' middle
+point from the middle of the bird view. I also calculate the running average
+of this value and round it up to 5 cm.
+
+[calculate_radius]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/ba5fc3a7d1391c84250ae79c5c8d0ca6464c6262/pipeline.py#L128
+[curvature_radius_formula]: ./examples/formula.png
+[estimate_radius]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/ba5fc3a7d1391c84250ae79c5c8d0ca6464c6262/pipeline.py#L111
+[estimate_position]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/ba5fc3a7d1391c84250ae79c5c8d0ca6464c6262/pipeline.py#L119
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
