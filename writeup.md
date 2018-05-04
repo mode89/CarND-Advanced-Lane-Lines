@@ -255,4 +255,10 @@ Here's a [link to my video result](./video.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The biggest issue for me was making the binary thresholded image. I tried
+gradients, but couldn't achieve a good quality with less noise. That's
+the reason, why I switched to the neural network based approach. I think
+that the pipeline going to fail on almost any new road, because the binary
+filter requires more training data. It doesn't generalize well on the other
+two challenging videos. Also the algorithm is going to fail on the roads
+with sharper turnes, because the sliding window is might be too narrow.
