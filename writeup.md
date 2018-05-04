@@ -231,9 +231,15 @@ of this value and round it up to 5 cm.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I implemented this step in the [`Pipeline.process()`][pipeline_process]
+function in the [pipeline.py][pipeline_script] script. Here is an example
+of my result on a test image:
 
-![alt text][image6]
+![Plot Back][plot_back]
+
+[pipeline_process]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/ba5fc3a7d1391c84250ae79c5c8d0ca6464c6262/pipeline.py#L21
+[pipeline_script]: ./pipeline.py
+[plot_back]: ./examples/plot_back.jpg
 
 ---
 
