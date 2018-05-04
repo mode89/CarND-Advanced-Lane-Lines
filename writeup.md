@@ -13,7 +13,6 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image2]: ./test_images/test1.jpg "Road Transformed"
 [image3]: ./examples/binary_combo_example.jpg "Binary Example"
 [image4]: ./examples/warped_straight_lines.jpg "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
@@ -73,8 +72,14 @@ by calling [`Model.undistort()`] and obtained the following result:
 
 #### 1. Provide an example of a distortion-corrected image.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+Here is the demonstration of the distortion correction (original and
+undistorted images):
+
+![Original Test Image][original_test_image]
+![Undistorted Test Image][undistorted_test_image]
+
+[original_test_image]: ./examples/original_test.jpg
+[undistorted_test_image]: ./examples/undistorted_test.jpg
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
