@@ -146,33 +146,38 @@ stages of the detection pipeline.
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+I've selected four points on one of the test images with straight lines, and
+mapped them to a rectangle on a bird view:
 
-```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-```
+![Test Image][test_image_red_square]
+![Bird View][bird_view_red_square]
 
-This resulted in the following source and destination points:
+I hardcoded this points:
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| Source        | Destination   |
+|:-------------:|:-------------:|
+| 560, 475      | 300, 1000     |
+| 725, 475      | 670, 1000     |
+| 298, 660      | 300, 2220     |
+| 1010, 660     | 670, 2220     |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+I've calculated the destination coordinated based on the assumption that the
+distance between lines is around 3.7 m and the lenght of a single dash line
+is around 10 feet, and single pixel of the bird eye view equal to 1 cm. Using
+those coordinates, I've [computed][compute_perspective_matrix] the
+transformation matrix, that [transforms][create_bird_view] an undistorted
+image into a bird eye view image, and the inverse matrix that
+[transforms][inverse_bird_view] a bird eye view into the undistorted image.
 
-![alt text][image4]
+All code related to the perspective transformation located in the
+[bird_view.py] script.
+
+[test_image_red_square]: ./examples/original_red_square.jpg
+[bird_view_red_square]: ./examples/bird_view_red_square.jpg
+[bird_view.py]: ./bird_view.py
+[compute_perspective_matrix]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/45e4e8aa5c15c8b1588b15bdd5c933e3094d80ad/bird_view.py#L26
+[create_bird_view]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/45e4e8aa5c15c8b1588b15bdd5c933e3094d80ad/bird_view.py#L29
+[inverse_bird_view]: https://github.com/mode89/CarND-Advanced-Lane-Lines/blob/45e4e8aa5c15c8b1588b15bdd5c933e3094d80ad/bird_view.py#L34
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
