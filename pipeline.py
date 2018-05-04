@@ -147,9 +147,16 @@ if __name__ == "__main__":
     pipeline = Pipeline()
     cv2.namedWindow("image", cv2.WINDOW_KEEPRATIO)
     cap = cv2.VideoCapture("project_video.mp4")
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    video = cv2.VideoWriter("video.avi", fourcc, 25, (1280, 720))
     while True:
         ret, image = cap.read()
-        image = pipeline.process(image)
-        cv2.imshow("image", image)
-        cv2.waitKey(1)
+        if ret:
+            image = pipeline.process(image)
+            video.write(image)
+            cv2.imshow("image", image)
+            cv2.waitKey(1)
+        else:
+            break
     cap.release()
+    video.release()
