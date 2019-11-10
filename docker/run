@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+GRAPHICS_OPTS="\
+    --env DISPLAY=$DISPLAY \
+    --volume /tmp/.X11-unix:/tmp/.X11-unix \
+"
+
+NVIDIA_OPTS="\
+    --env NVIDIA_VISIBLE_DEVICES=all \
+    --env NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility \
+    --runtime=nvidia \
+"
+
+run_container() {
+    docker run \
+        --interactive \
+        --name lane-detection \
+        --rm \
+        --tty \
+        --user user \
+        --volume $PWD:/workdir:rw \
+        $GRAPHICS_OPTS \
+        $NVIDIA_OPTS \
+        lane-detection \
+        $@ || exit -1
+}
+
+run_container $@

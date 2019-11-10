@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+BUILD_DIR=$(dirname $0)
+CONTAINER_USER=user
+HOST_USER_GID=$(id --group)
+HOST_USER_UID=$(id --user)
+IMAGE_NAME=lane-detection
+
+build_image() {
+    docker build \
+        --build-arg CONTAINER_USER=${CONTAINER_USER:?} \
+        --build-arg HOST_USER_GID=${HOST_USER_GID:?} \
+        --build-arg HOST_USER_UID=${HOST_USER_UID:?} \
+        --build-arg TIMEZONE=$(cat /etc/timezone) \
+        --tag $IMAGE_NAME \
+        $BUILD_DIR || exit_on_error
+}
+
+build_image
