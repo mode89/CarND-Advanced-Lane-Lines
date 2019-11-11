@@ -38,6 +38,7 @@ RUN apt-get install -y libopencv-dev
 RUN apt-get install -y python3-opencv
 RUN pip3 install keras
 RUN pip3 install tensorflow-gpu==1.14.0
+RUN pip3 install deap
 
 WORKDIR /workdir
 CMD /bin/bash
