@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+import binary_filter
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
+import gc
 from keras.backend.tensorflow_backend import set_session
+from keras.backend import clear_session
 import numpy
 import os
 import random
@@ -14,6 +17,7 @@ MIN_INDIVIDUAL_SIZE = 2
 MAX_INDIVIDUAL_SIZE = 7
 POPULATION_SIZE = 50
 GENERATIONS_NUM = 1000
+EVALUATION_NUM = 3
 
 toolbox = base.Toolbox()
 
@@ -46,7 +50,7 @@ def random_kernel_size():
 def evaluate(ind):
     valLosses = list()
     lossDiffs = list()
-    for i in range(3):
+    for i in range(EVALUATION_NUM):
         model = binary_filter.Model(ind)
         valLoss, trainLoss = model.train_model()
         valLosses.append(valLoss)
@@ -84,13 +88,8 @@ def mutate(ind):
     mutations = {
         mutate_filter_num: 10,
         mutate_kernel_size: 10,
-        mutate_complete: 1,
+        mutate_complete: 2,
     }
-
-    if len(mutant) < MAX_INDIVIDUAL_SIZE:
-        mutations[mutate_append_layer] = 1
-    if len(mutant) > MIN_INDIVIDUAL_SIZE:
-        mutations[mutate_remove_layer] = 1
 
     funcs = list(mutations.keys())
     weights = [mutations[func] for func in funcs]
@@ -120,7 +119,7 @@ def mutate_remove_layer(ind):
     ind.pop()
 
 def main():
-    random.seed(42)
+    # random.seed(42)
 
     init_tensorflow()
 
@@ -131,12 +130,12 @@ def main():
     toolbox.register("individual", random_individual)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("evaluate", evaluate)
-    toolbox.register("mate", mate)
+    toolbox.register("mate", tools.cxOnePoint)
     toolbox.register("mutate", mutate)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
     population = toolbox.population(n=POPULATION_SIZE)
-    hallOfFame = tools.HallOfFame(1)
+    hallOfFame = tools.HallOfFame(10)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
@@ -144,7 +143,7 @@ def main():
     stats.register("max", numpy.max)
 
     population, log = algorithms.eaSimple(
-        population, toolbox, cxpb=0.5, mutpb=0.2, ngen=GENERATIONS_NUM,
+        population, toolbox, cxpb=0.6, mutpb=0.5, ngen=GENERATIONS_NUM,
         stats=stats, halloffame=hallOfFame, verbose=True)
 
 if __name__ == "__main__":
