@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+import binary_filter
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
+import gc
 from keras.backend.tensorflow_backend import set_session
+from keras.backend import clear_session
 import numpy
 import os
 import random
@@ -136,7 +139,7 @@ def main():
     toolbox.register("select", tools.selTournament, tournsize=3)
 
     population = toolbox.population(n=POPULATION_SIZE)
-    hallOfFame = tools.HallOfFame(1)
+    hallOfFame = tools.HallOfFame(10)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)

@@ -1,10 +1,12 @@
 import cv2
 import glob
+from keras.backend.tensorflow_backend import set_session
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Conv2D
 from keras.models import Sequential, load_model
 import numpy as np
 import os
+import tensorflow as tf
 
 TRAIN_IMAGES = [
     "straight_lines1.jpg",
@@ -22,6 +24,65 @@ TEST_IMAGES = [
 
 class Model:
 
+    def __init__(self, topology=None):
+        self.train_features, self.train_labels = self.load_images(TRAIN_IMAGES)
+        self.test_features, self.test_labels = self.load_images(TEST_IMAGES)
+
+        if topology is None:
+            self.model = Sequential()
+            self.model.add(Conv2D(
+                filters=16,
+                kernel_size=7,
+                strides=1,
+                padding="same",
+                activation="relu",
+                input_shape=self.train_features.shape[1:]))
+            self.model.add(Conv2D(
+                filters=12,
+                kernel_size=5,
+                strides=1,
+                padding="same",
+                activation="relu"))
+            self.model.add(Conv2D(
+                filters=6,
+                kernel_size=3,
+                strides=1,
+                padding="same",
+                activation="relu"))
+            self.model.add(Conv2D(
+                filters=1,
+                kernel_size=1,
+                strides=1,
+                padding="same",
+                activation="relu"))
+            self.model.compile(optimizer="adam", loss="mse")
+            self.model.summary()
+        else:
+            firstLayer = topology[0]
+            self.model = Sequential()
+            self.model.add(Conv2D(
+                filters=firstLayer["filters"],
+                kernel_size=firstLayer["kernel_size"],
+                strides=1,
+                padding="same",
+                activation="relu",
+                input_shape=self.train_features.shape[1:]))
+            for layer in topology[1:]:
+                self.model.add(Conv2D(
+                    filters=layer["filters"],
+                    kernel_size=layer["kernel_size"],
+                    strides=1,
+                    padding="same",
+                    activation="relu"))
+            self.model.add(Conv2D(
+                filters=1,
+                kernel_size=1,
+                strides=1,
+                padding="same",
+                activation="relu"))
+            self.model.compile(optimizer="adam", loss="mse")
+            self.model.summary()
+
     def load_images(self, image_file_names):
         feature_images = list()
         label_images = list()
@@ -38,54 +99,22 @@ class Model:
         return features, labels
 
     def train_model(self):
-        train_features, train_labels = self.load_images(TRAIN_IMAGES)
-        test_features, test_labels = self.load_images(TEST_IMAGES)
-
-        self.model = Sequential()
-        self.model.add(Conv2D(
-            filters=16,
-            kernel_size=7,
-            strides=1,
-            padding="same",
-            activation="relu",
-            input_shape=train_features.shape[1:]))
-        self.model.add(Conv2D(
-            filters=12,
-            kernel_size=5,
-            strides=1,
-            padding="same",
-            activation="relu"))
-        self.model.add(Conv2D(
-            filters=6,
-            kernel_size=3,
-            strides=1,
-            padding="same",
-            activation="relu"))
-        self.model.add(Conv2D(
-            filters=1,
-            kernel_size=1,
-            strides=1,
-            padding="same",
-            activation="relu"))
-        self.model.compile(optimizer="adam", loss="mse")
-        self.model.summary()
-
         model_checkpoint = ModelCheckpoint(
             "binary_filter.h5",
             monitor="val_loss",
             save_best_only=True,
-            verbose=1)
+            verbose=0)
         early_stopping = EarlyStopping(
             monitor="val_loss", min_delta=0.00001, patience=30)
 
-        self.model.fit(
-            x=train_features,
-            y=train_labels,
-            validation_data=(test_features, test_labels),
+        history = self.model.fit(
+            x=self.train_features,
+            y=self.train_labels,
+            validation_data=(self.test_features, self.test_labels),
             callbacks=[
-                model_checkpoint,
                 early_stopping
             ],
+            verbose=0,
             epochs=1000)
         valLossHistory = history.history["val_loss"]
         trainLossHistory = history.history["loss"]
@@ -110,6 +139,11 @@ class Model:
         return binary_image
 
 if __name__ == "__main__":
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    session = tf.Session(config=config)
+    set_session(session)
 
     binary_filter = Model()
     binary_filter.train_model()
