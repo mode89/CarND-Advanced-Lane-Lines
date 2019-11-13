@@ -109,8 +109,7 @@ def mutate_append_layer(ind):
     ind.append(random_layer())
 
 def mutate_remove_layer(ind):
-    layer = random.choice(ind)
-    ind.remove(layer)
+    ind.pop()
 
 def main():
     random.seed(42)
