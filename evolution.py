@@ -71,16 +71,19 @@ def mutate(ind):
     mutant = toolbox.clone(ind)
     del mutant.fitness.values
 
-    mutations = [
-        mutate_filter_num,
-        mutate_kernel_size,
-    ]
+    mutations = {
+        mutate_filter_num: 10,
+        mutate_kernel_size: 10
+    }
 
     if len(mutant) < MAX_INDIVIDUAL_SIZE:
-        mutations.append(mutate_size)
+        mutations[mutate_size] = 1
 
-    mutation = random.choice(mutations)
+    funcs = list(mutations.keys())
+    weights = [mutations[func] for func in funcs]
+    mutation = random.choices(funcs, weights)[0]
     mutation(mutant)
+
     return mutant,
 
 def mutate_filter_num(ind):
