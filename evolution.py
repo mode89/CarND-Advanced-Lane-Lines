@@ -42,11 +42,15 @@ def random_kernel_size():
     return random.randint(0, 5) * 2 + 1
 
 def evaluate(ind):
-    model = binary_filter.Model(ind)
-    valLoss, trainLoss = model.train_model()
-    score = valLoss + abs(valLoss - trainLoss)
+    scores = list()
+    for i in range(3):
+        model = binary_filter.Model(ind)
+        valLoss, trainLoss = model.train_model()
+        clear_session()
+        score = valLoss + abs(valLoss - trainLoss)
+        scores.append(score)
+    score = sum(scores) / len(scores)
     print("Score = {}".format(score))
-    clear_session()
     return score,
 
 def mate(ind1, ind2):
