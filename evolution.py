@@ -39,7 +39,7 @@ def random_filter_num():
     return random.randint(1, 16)
 
 def random_kernel_size():
-    return random.randint(0, 3) * 2 + 1
+    return random.randint(0, 5) * 2 + 1
 
 def evaluate(ind):
     model = binary_filter.Model(ind)
