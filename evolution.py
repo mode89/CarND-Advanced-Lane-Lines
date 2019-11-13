@@ -6,6 +6,7 @@ from deap import creator
 from deap import tools
 from keras.backend.tensorflow_backend import set_session
 import numpy
+import os
 import random
 import tensorflow as tf
 
@@ -17,6 +18,7 @@ GENERATIONS_NUM = 1000
 toolbox = base.Toolbox()
 
 def init_tensorflow():
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     session = tf.Session(config=config)
