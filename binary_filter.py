@@ -87,6 +87,14 @@ class Model:
                 early_stopping
             ],
             epochs=1000)
+        valLossHistory = history.history["val_loss"]
+        trainLossHistory = history.history["loss"]
+        bestValLoss = min(valLossHistory)
+        bestEpoch = valLossHistory.index(bestValLoss)
+        bestTrainLoss = trainLossHistory[bestEpoch]
+        print("Best validation loss: {}".format(bestValLoss))
+        print("Best train loss: {}".format(bestTrainLoss))
+        return bestValLoss, bestTrainLoss
 
     def load(self):
         self.model = load_model("binary_filter.h5")

@@ -42,10 +42,12 @@ def random_kernel_size():
     return random.randint(0, 3) * 2 + 1
 
 def evaluate(ind):
-    value = 0
-    for layer in ind:
-        value += (layer["filters"] + layer["kernel_size"])
-    return value,
+    model = binary_filter.Model(ind)
+    valLoss, trainLoss = model.train_model()
+    score = valLoss + abs(valLoss - trainLoss)
+    print("Score = {}".format(score))
+    clear_session()
+    return score,
 
 def mate(ind1, ind2):
     ind1Size = len(ind1)
