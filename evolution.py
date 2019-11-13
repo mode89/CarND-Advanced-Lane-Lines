@@ -9,8 +9,9 @@ import numpy
 import random
 import tensorflow as tf
 
-MAX_INDIVIDUAL_SIZE = 10
-POPULATION_SIZE = 10
+MIN_INDIVIDUAL_SIZE = 2
+MAX_INDIVIDUAL_SIZE = 7
+POPULATION_SIZE = 50
 GENERATIONS_NUM = 1000
 
 toolbox = base.Toolbox()
@@ -77,7 +78,9 @@ def mutate(ind):
     }
 
     if len(mutant) < MAX_INDIVIDUAL_SIZE:
-        mutations[mutate_size] = 1
+        mutations[mutate_append_layer] = 1
+    if len(mutant) > MIN_INDIVIDUAL_SIZE:
+        mutations[mutate_remove_layer] = 1
 
     funcs = list(mutations.keys())
     weights = [mutations[func] for func in funcs]
@@ -94,8 +97,12 @@ def mutate_kernel_size(ind):
     layer = random.choice(ind)
     layer["kernel_size"] = random_kernel_size()
 
-def mutate_size(ind):
+def mutate_append_layer(ind):
     ind.append(random_layer())
+
+def mutate_remove_layer(ind):
+    layer = random.choice(ind)
+    ind.remove(layer)
 
 def main():
     random.seed(42)
