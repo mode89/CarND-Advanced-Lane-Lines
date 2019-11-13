@@ -21,15 +21,24 @@ def init_tensorflow():
     session = tf.Session(config=config)
     set_session(session)
 
-def create_random_individual():
+def random_individual():
     size = random.randint(2, MAX_INDIVIDUAL_SIZE)
     ind = creator.Individual()
     for layerIndex in range(size):
-        layer = creator.Layer()
-        layer["filters"] = toolbox.random_filter_num()
-        layer["kernel_size"] = toolbox.random_kernel_size()
-        ind.append(layer)
+        ind.append(random_layer())
     return ind
+
+def random_layer():
+    layer = creator.Layer()
+    layer["filters"] = random_filter_num()
+    layer["kernel_size"] = random_kernel_size()
+    return layer
+
+def random_filter_num():
+    return random.randint(1, 16)
+
+def random_kernel_size():
+    return random.randint(0, 3) * 2 + 1
 
 def evaluate(ind):
     value = 0
@@ -60,16 +69,30 @@ def mate(ind1, ind2):
 
 def mutate(ind):
     mutant = toolbox.clone(ind)
-    layer = random.choice(mutant)
-    layerAttr = random.choice(list(layer.keys()))
-    if layerAttr == "filters":
-        layer["filters"] = toolbox.random_filter_num()
-    elif layerAttr == "kernel_size":
-        layer["kernel_size"] = toolbox.random_kernel_size()
-    else:
-        raise RuntimeError("Unknown layer attribute")
     del mutant.fitness.values
+
+    mutations = [
+        mutate_filter_num,
+        mutate_kernel_size,
+    ]
+
+    if len(mutant) < MAX_INDIVIDUAL_SIZE:
+        mutations.append(mutate_size)
+
+    mutation = random.choice(mutations)
+    mutation(mutant)
     return mutant,
+
+def mutate_filter_num(ind):
+    layer = random.choice(ind)
+    layer["filters"] = random_filter_num()
+
+def mutate_kernel_size(ind):
+    layer = random.choice(ind)
+    layer["kernel_size"] = random_kernel_size()
+
+def mutate_size(ind):
+    ind.append(random_layer())
 
 def main():
     random.seed(42)
@@ -80,11 +103,7 @@ def main():
     creator.create("Individual", list, fitness=creator.FitnessMin)
     creator.create("Layer", dict)
 
-    toolbox.register("random_filter_num",
-        lambda: random.randint(1, 16))
-    toolbox.register("random_kernel_size",
-        lambda: random.randint(0, 3) * 2 + 1)
-    toolbox.register("individual", create_random_individual)
+    toolbox.register("individual", random_individual)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", mate)
