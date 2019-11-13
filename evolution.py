@@ -44,16 +44,17 @@ def random_kernel_size():
     return random.randint(0, 5) * 2 + 1
 
 def evaluate(ind):
-    scores = list()
+    valLosses = list()
+    lossDiffs = list()
     for i in range(3):
         model = binary_filter.Model(ind)
         valLoss, trainLoss = model.train_model()
+        valLosses.append(valLoss)
+        lossDiffs.append(abs(valLoss - trainLoss))
         clear_session()
-        score = valLoss + abs(valLoss - trainLoss)
-        scores.append(score)
-    score = sum(scores) / len(scores)
-    print("Score = {}".format(score))
-    return score,
+    valLoss = sum(valLosses) / len(valLosses)
+    lossDiffs = sum(lossDiffs) / len(lossDiffs)
+    return valLoss, lossDiffs
 
 def mate(ind1, ind2):
     ind1Size = len(ind1)
@@ -116,7 +117,7 @@ def main():
 
     init_tensorflow()
 
-    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("FitnessMin", base.Fitness, weights=(-2.0, -1.0))
     creator.create("Individual", list, fitness=creator.FitnessMin)
     creator.create("Layer", dict)
 
