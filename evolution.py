@@ -83,7 +83,8 @@ def mutate(ind):
 
     mutations = {
         mutate_filter_num: 10,
-        mutate_kernel_size: 10
+        mutate_kernel_size: 10,
+        mutate_complete: 1,
     }
 
     if len(mutant) < MAX_INDIVIDUAL_SIZE:
@@ -105,6 +106,12 @@ def mutate_filter_num(ind):
 def mutate_kernel_size(ind):
     layer = random.choice(ind)
     layer["kernel_size"] = random_kernel_size()
+
+def mutate_complete(ind):
+    ind.clear()
+    newInd = random_individual()
+    for layer in newInd:
+        ind.append(layer)
 
 def mutate_append_layer(ind):
     ind.append(random_layer())
